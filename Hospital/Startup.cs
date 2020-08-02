@@ -1,6 +1,8 @@
 using System.Text;
 using AutoMapper;
+using Hospital.Core;
 using Hospital.Data;
+using Hospital.Data.Repositories;
 using Hospital.Entities.Models;
 using Hospital.Entities.Resources;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -58,6 +60,10 @@ namespace Hospital
                .AddEntityFrameworkStores<HospitalsDbContext>();
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IHospitalRepository, HospitalRepository>();
+
             services.AddMvc();
         }
 
