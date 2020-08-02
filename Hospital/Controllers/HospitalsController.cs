@@ -25,5 +25,11 @@ namespace Hospital.Controllers
             this.repository = repository;
             this.userManager = userManager;
         }
+        [HttpGet("/api/nearest-hospital")]
+        public async Task<IActionResult> NearestHospital(double userLatitude, double userLongitude)
+        {
+            var hospital = await repository.GetNearestHospital(userLatitude, userLongitude);
+            return Ok(hospital);
+        }
     }
 }

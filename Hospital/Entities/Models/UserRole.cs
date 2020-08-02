@@ -7,3 +7,4 @@ namespace Hospital.Entities.Models
         public User User { get; set; }
         public Role Role { get; set; }
     }
+}

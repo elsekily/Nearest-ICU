@@ -8,3 +8,4 @@ namespace Hospital.Entities.Models
         public ICollection<UserRole> User { get; set; }
 
     }
+}
