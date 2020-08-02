@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using Hospital.Core;
 using Hospital.Entities.Models;
@@ -10,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hospital.Controllers
 {
+    [Route("api/[controller]")]
     public class HospitalsController : Controller
     {
         private readonly IMapper mapper;
@@ -25,7 +23,7 @@ namespace Hospital.Controllers
             this.repository = repository;
             this.userManager = userManager;
         }
-        [HttpGet("/api/nearest-hospital")]
+        [HttpGet("nearest")]
         public async Task<IActionResult> NearestHospital(double userLatitude, double userLongitude)
         {
             var hospital = await repository.GetNearestHospital(userLatitude, userLongitude);
