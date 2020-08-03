@@ -8,8 +8,8 @@ namespace Hospital.Core
     {
         Task<IEnumerable<Entities.Models.Hospital>> GetHospitals();
         Task<Entities.Models.Hospital> GetHospital(int id);
-        void Add(Entities.Models.Hospital author);
-        void Remove(Entities.Models.Hospital author);
+        void Add(Entities.Models.Hospital hospital);
+        void Remove(Entities.Models.Hospital hospital);
         HospitalDistanceResource GetNearestHospital(double userLatitude, double userLongitude);
     }
 }

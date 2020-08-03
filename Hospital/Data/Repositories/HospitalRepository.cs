@@ -15,23 +15,22 @@ namespace Hospital.Data.Repositories
         {
             this.context = context; 
         }
-            public void Add(Entities.Models.Hospital author)
+        public async void Add(Entities.Models.Hospital hospital)
         {
-            throw new NotImplementedException();
+            await context.Hospitals.AddAsync(hospital);
         }
-
         public Task<Entities.Models.Hospital> GetHospital(int id)
         {
             return context.Hospitals.Include(h => h.User).SingleOrDefaultAsync(h => h.Id == id);
         }
 
-        public Task<IEnumerable<Entities.Models.Hospital>> GetHospitals()
+        public async Task<IEnumerable<Entities.Models.Hospital>> GetHospitals()
         {
-            throw new NotImplementedException();
+            return await context.Hospitals.Include(h => h.User).ToListAsync();
         }
-        public void Remove(Entities.Models.Hospital author)
+        public void Remove(Entities.Models.Hospital hospital)
         {
-            throw new NotImplementedException();
+            context.Hospitals.Remove(hospital);
         }
         public HospitalDistanceResource GetNearestHospital(double userLatitude, double userLongitude)
         {

@@ -1,16 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hospital.Core;
-using Hospital.Data;
 using Hospital.Entities.Models;
 using Hospital.Entities.Resources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MySqlX.XDevAPI.Common;
 
 namespace Hospital.Controllers
 {
@@ -44,6 +40,14 @@ namespace Hospital.Controllers
             var result = mapper.Map<Entities.Models.Hospital, HospitalResource>(hospital);
             return Ok(result);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetHospitals(int id)
+        {
+            var hospitals = await repository.GetHospitals();
+            var result = mapper.Map<IEnumerable<Entities.Models.Hospital>, 
+                IEnumerable<HospitalResource>>(hospitals);
+            return Ok(result);
+        }
         [Authorize(Policy = Policies.Moderator)]
         [HttpPost]
         public async Task<IActionResult> CreateHospital([FromBody] HospitalSaveResource HospitalResource)
@@ -63,7 +67,8 @@ namespace Hospital.Controllers
         }
         [Authorize(Policy = Policies.Moderator)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateHospital(int id, [FromBody] HospitalSaveResource hospitalResource)
+        public async Task<IActionResult> UpdateHospital(int id, 
+            [FromBody] HospitalSaveResource hospitalResource)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -98,5 +103,4 @@ namespace Hospital.Controllers
             return Accepted();
         }
     }
-}
 }
