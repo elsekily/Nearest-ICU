@@ -61,5 +61,42 @@ namespace Hospital.Controllers
             var result = mapper.Map<Entities.Models.Hospital, HospitalResource>(hospital);
             return Created(nameof(GetHospital), result);
         }
+        [Authorize(Policy = Policies.Moderator)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateHospital(int id, [FromBody] HospitalSaveResource hospitalResource)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var hospital = await repository.GetHospital(id);
+
+            var user = userManager.GetUserAsync(HttpContext.User);
+
+            if (hospital.User.Id != user.Id || user.Id != 1)
+                return Unauthorized();
+
+            mapper.Map<HospitalSaveResource, Entities.Models.Hospital>(hospitalResource, hospital);
+
+            await unitOfWork.CompleteAsync();
+
+            hospital = await repository.GetHospital(hospital.Id);
+            var result = mapper.Map<Entities.Models.Hospital, HospitalResource>(hospital);
+            return Accepted(result);
+        }
+        [Authorize(Policy = Policies.Admin)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteHospital(int id)
+        {
+            var hospital = await repository.GetHospital(id);
+
+            if (hospital == null)
+                return NotFound();
+
+            repository.Remove(hospital);
+            await unitOfWork.CompleteAsync();
+
+            return Accepted();
+        }
     }
+}
 }
