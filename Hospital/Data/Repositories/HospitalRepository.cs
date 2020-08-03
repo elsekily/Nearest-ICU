@@ -22,7 +22,7 @@ namespace Hospital.Data.Repositories
 
         public Task<Entities.Models.Hospital> GetHospital(int id)
         {
-            return context.Hospitals.SingleOrDefaultAsync(h => h.Id == id);
+            return context.Hospitals.Include(h => h.User).SingleOrDefaultAsync(h => h.Id == id);
         }
 
         public Task<IEnumerable<Entities.Models.Hospital>> GetHospitals()
@@ -43,7 +43,6 @@ namespace Hospital.Data.Repositories
                     Address = x.Address,
                     Longitude = x.Longitude,
                     Latitude = x.Latitude,
-                    FreeUnits = x.FreeUnits,
                     Distance = Distance(userLatitude, userLongitude, x.Latitude, x.Longitude),
                 })
                 .OrderBy(d => d.Distance).FirstOrDefault(); ;

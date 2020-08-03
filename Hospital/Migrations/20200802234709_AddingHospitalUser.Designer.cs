@@ -3,14 +3,16 @@ using System;
 using Hospital.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Hospital.Migrations
 {
     [DbContext(typeof(HospitalsDbContext))]
-    partial class HospitalsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200802234709_AddingHospitalUser")]
+    partial class AddingHospitalUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

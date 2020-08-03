@@ -1,13 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Hospital.Entities.Models
+namespace Hospital.Entities.Resources
 {
-    public class Hospital
+    public class HospitalSaveResource
     {
-        public int Id { get; set; }
         [Required]
         [StringLength(255)]
         public string Name { get; set; }
@@ -19,7 +15,5 @@ namespace Hospital.Entities.Models
         public double Latitude { get; set; }
         [Required]
         public int FreeUnits { get; set; }
-        [Required]
-        public User User { get; set; }
     }
 }

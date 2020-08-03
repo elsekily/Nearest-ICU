@@ -26,6 +26,7 @@ namespace Hospital.Data
             builder.Entity<IdentityUserToken<int>>(x => x.Property(m => m.LoginProvider).HasMaxLength(255));
             builder.Entity<IdentityUserToken<int>>(x => x.Property(m => m.Name).HasMaxLength(255));
 
+            builder.Entity<Entities.Models.Hospital>().HasOne(b => b.User).WithMany(u => u.Hospitals);
         }
     }
 }
