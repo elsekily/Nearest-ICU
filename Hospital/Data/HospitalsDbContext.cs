@@ -2,9 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Hospital.Data
 {
@@ -27,6 +24,11 @@ namespace Hospital.Data
             builder.Entity<IdentityUserToken<int>>(x => x.Property(m => m.Name).HasMaxLength(255));
 
             builder.Entity<Entities.Models.Hospital>().HasOne(b => b.User).WithMany(u => u.Hospitals);
+
+            builder.HasDbFunction(typeof(DbFunctions)
+                .GetMethod(nameof(DbFunctions.Distance)))
+                .HasName(nameof(DbFunctions.Distance));
         }
+        
     }
 }

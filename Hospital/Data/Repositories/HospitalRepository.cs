@@ -34,26 +34,17 @@ namespace Hospital.Data.Repositories
         }
         public HospitalDistanceResource GetNearestHospital(double userLatitude, double userLongitude)
         {
-
-            return context.Hospitals.ToList()
+            return context.Hospitals
                 .Select(x => new HospitalDistanceResource
                 {
                     Name = x.Name,
                     Address = x.Address,
                     Longitude = x.Longitude,
                     Latitude = x.Latitude,
-                    Distance = Distance(userLatitude, userLongitude, x.Latitude, x.Longitude),
+                    Distance = DbFunctions.Distance(userLatitude, userLongitude, x.Latitude, x.Longitude)
                 })
-                .OrderBy(d => d.Distance).FirstOrDefault(); ;
+                .OrderBy(d => d.Distance).FirstOrDefault(); 
         }
-        private double Distance(double userLatitude, double userLongitude,
-            double locationLatitude, double locationlongitude)
-        {
-            return Math.Round((((Math.Acos(Math.Sin((userLatitude * Math.PI / 180)) *
-                Math.Sin((locationLatitude * Math.PI / 180)) + Math.Cos((userLatitude * Math.PI / 180)) *
-                Math.Cos((locationLatitude * Math.PI / 180)) *
-                Math.Cos(((userLongitude - locationlongitude) * Math.PI / 180)))) *
-                180 / Math.PI) * 60 * 1.1515 * 1.609344), 2);
-        }
+        
     }
 }
