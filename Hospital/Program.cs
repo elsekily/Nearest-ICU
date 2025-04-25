@@ -1,36 +1,93 @@
+using System.Text;
+using AutoMapper;
+using Hospital.Core;
 using Hospital.Data;
+using Hospital.Data.Repositories;
 using Hospital.Entities.Models;
-using Microsoft.AspNetCore.Hosting;
+using Hospital.Entities.Resources;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Hospital
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container
+builder.Services.AddAuthorization(config =>
 {
-    public class Program
+    config.AddPolicy(Policies.Admin, Policies.Policy(Policies.Admin));
+    config.AddPolicy(Policies.Moderator, Policies.Policy(Policies.Moderator));
+});
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(opt =>
+{
+    opt.TokenValidationParameters = new TokenValidationParameters
     {
-        public static void Main(string[] args)
-        {
-            var host = CreateHostBuilder(args).Build();
-            using (var scope = host.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<HospitalsDbContext>();
-                var userManager = services.GetRequiredService<UserManager<User>>();
-                var roleManager = services.GetRequiredService<RoleManager<Role>>();
-                context.Database.Migrate();
-                Seed.SeedUsers(userManager, roleManager);
-            }
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
 
-            host.Run();
-        }
+builder.Services.AddDbContext<HospitalsDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+builder.Services.AddIdentity<User, Role>()
+    .AddEntityFrameworkStores<HospitalsDbContext>();
+
+builder.Services.AddAutoMapper(typeof(Program)); // Changed from Startup to Program
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
+
+builder.Services.AddControllersWithViews(); // replaces AddMvc()
+
+var app = builder.Build();
+
+// Seed database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<HospitalsDbContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<Role>>();
+    context.Database.Migrate();
+    Seed.SeedUsers(userManager, roleManager);
 }
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
