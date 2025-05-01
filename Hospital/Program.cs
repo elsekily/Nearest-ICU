@@ -16,11 +16,13 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
-builder.Services.AddAuthorization(config =>
+
+builder.Services.AddAuthorization(opt =>
 {
-    config.AddPolicy(Policies.Admin, Policies.Policy(Policies.Admin));
-    config.AddPolicy(Policies.Moderator, Policies.Policy(Policies.Moderator));
+    opt.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .Build();
+    opt.AddPolicy(Policies.Admin, Policies.Policy(Policies.Admin));
+    opt.AddPolicy(Policies.Moderator, Policies.Policy(Policies.Moderator));
 });
 
 builder.Services.AddAuthentication(options =>
@@ -48,11 +50,12 @@ builder.Services.AddDbContext<HospitalsDbContext>(options =>
 builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<HospitalsDbContext>();
 
-builder.Services.AddAutoMapper(typeof(Program)); // Changed from Startup to Program
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
 
-builder.Services.AddControllersWithViews(); // replaces AddMvc()
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -86,8 +89,16 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<HospitalsDbContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<Role>>();
+    context.Database.Migrate();
+    Seed.SeedUsers(userManager, roleManager);
+}
 
 app.Run();

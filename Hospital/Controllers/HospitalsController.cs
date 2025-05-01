@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hospital.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class HospitalsController : Controller
     {
@@ -41,7 +42,7 @@ namespace Hospital.Controllers
             return Ok(result);
         }
         [HttpGet]
-        public async Task<IActionResult> GetHospitals(int id)
+        public async Task<IActionResult> GetHospitals()
         {
             var hospitals = await repository.GetHospitals();
             var result = mapper.Map<IEnumerable<Entities.Models.Hospital>, 
